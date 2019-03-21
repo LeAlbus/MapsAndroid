@@ -108,7 +108,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
         locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
         this.initLocationListener()
-        this.requestLocationUpdates()
+        //this.requestLocationUpdates()
         //Click
         mMap.setOnMapClickListener {
             mMap.addMarker(MarkerOptions()

@@ -26,7 +26,7 @@ object PermissionUtils {
 
                 else {
                     val newPermission = arrayOfNulls<String>(permissionList.size)
-                    ActivityCompat.requestPermissions(activity, newPermission, requestCode)
+                    ActivityCompat.requestPermissions(activity, permissionList.toTypedArray(), requestCode)
                 }
             }
             return true
