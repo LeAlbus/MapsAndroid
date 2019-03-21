@@ -1,10 +1,17 @@
 package com.pedro.mapsandroid
 
 import android.Manifest
+import android.annotation.SuppressLint
+import android.content.Context
+import android.content.pm.PackageManager
 import android.graphics.BitmapFactory
 import android.graphics.Color
+import android.location.Location
+import android.location.LocationListener
+import android.location.LocationManager
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.widget.Toast
 
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -19,6 +26,32 @@ import com.pedro.mapsandroid.utils.PermissionUtils
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var mMap: GoogleMap
+    private lateinit var locationManager: LocationManager
+    private lateinit var locationListenet: LocationListener
+
+    fun initLocationListener(){
+        this.locationListenet = object : LocationListener{
+            override fun onLocationChanged(location: Location?) {
+
+                val currentLocation = LatLng(location?.latitude!!, location?.longitude!!)
+                mMap.addMarker(MarkerOptions().position(currentLocation))
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 15f))
+            }
+
+            override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {
+                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            }
+
+            override fun onProviderEnabled(provider: String?) {
+                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            }
+
+            override fun onProviderDisabled(provider: String?) {
+                TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            }
+
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,8 +72,28 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
+        for (permission in grantResults) {
+
+            if (permission == PackageManager.PERMISSION_DENIED){
+                Toast.makeText(this,
+                        "PermissionDenied",
+                        Toast.LENGTH_SHORT).show()
+            } else {
+                requestLocationUpdates()
+
+            }
+        }
 
     }
+
+    @SuppressLint("MissingPermission") //Force unrap of permission, already checked
+    private fun requestLocationUpdates() {
+        locationManager.requestLocationUpdates(
+                            LocationManager.GPS_PROVIDER,
+                            0, 0f,
+                            locationListenet)
+    }
+
     /**
      * Manipulates the map once available.
      * This callback is triggered when the map is ready to be used.
@@ -53,7 +106,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
 
-
+        locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        this.initLocationListener()
+        this.requestLocationUpdates()
         //Click
         mMap.setOnMapClickListener {
             mMap.addMarker(MarkerOptions()
